@@ -25,7 +25,7 @@ def home(): # this runs when someone reaches "/"
 # POST is used bcs we are sending users ={"admin" ...} to the server
 def login(): # login function 
     data = request.get_json()  # read json 
-    # now dats contains user ={"username": "admin", ...}
+    # now data contains user ={"username": "admin", ...}
 
     username = data.get("username")
     password = data.get("password")
@@ -37,15 +37,7 @@ def login(): # login function
             "username": username,
             "role": users[username]["role"]
         }
-
-        # tokens[token] = username  # stored inside the tokens = {}
-        tokens[token] = {
-            "username": username,
-            "role": users[username]["role"]
-        }
-
-
-
+    
         return jsonify({   # success response
             "username": tokens[token]["username"],
             "role": tokens[token]["role"]
