@@ -3,8 +3,14 @@ from flask import Flask, request, jsonify
 app = Flask(__name__) # create Flask application 
 
 users = {               # fake database, it is just python dictionary 
-    "admin": "admin123",
-    "subhash": "user123"
+    "admin": {
+        "password": "admin123",
+        "role": "admin"
+    },
+    "subhash": {
+        "password": "user123",
+        "role": "user"
+    }
 }
 
 tokens = {}
@@ -24,13 +30,25 @@ def login(): # login function
     username = data.get("username")
     password = data.get("password")
 
-    if username in users and users[username] == password: #authentication check
-        token = username + '-token'
+    token = username + "-token"
 
-        tokens[token] = username  # stored inside the tokens = {}
+    if username in users and users[username]["password"] == password: #authentication check
+        tokens[token] = {
+            "username": username,
+            "role": users[username]["role"]
+        }
+
+        # tokens[token] = username  # stored inside the tokens = {}
+        tokens[token] = {
+            "username": username,
+            "role": users[username]["role"]
+        }
+
+
 
         return jsonify({   # success response
-            "token": token
+            "username": tokens[token]["username"],
+            "role": tokens[token]["role"]
         }), 200
 
     return jsonify({
