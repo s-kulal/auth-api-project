@@ -47,7 +47,8 @@ def profile():
             "error": "Token Missing"
         }), 401
 
-    token = auth_header.replace("Bearer ", "") # extract token  -> admin-token
+    token = auth_header.replace("Bearer ", "") # replace "Bearer " with "" then 
+                                               # extract token  -> admin-token
 
     if token not in tokens: # validate tokens
         return jsonify({
