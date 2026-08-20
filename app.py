@@ -68,6 +68,34 @@ def profile():
     return jsonify({
         "username": tokens[token]
     }), 200
+
+@app.route("/create-user", methods=["POST"])
+def create_user():
+
+    auth_header = request.headers.get("Authorization")  # exact header 
+    # receives Authorization: Bearer admin-token 
+    if not auth_header:
+        return jsonify({
+            "error": "Token Missing"
+        }), 401
+
+    token = auth_header.replace("Bearer ", "")   # token = admin-token 
+                                                 # bcs bearer is replaced with ""
+    if token not in tokens:         # Check token
+        return jsonify({
+            "error": "Invalid Token"
+        }), 401
+
+    user = tokens[token]       # Retrieves Users data -> admin, subhash, etc
+
+    if user["role"] != "admin": # aunthenticating the role 
+        return jsonify({        # to decide the authorization
+            "error": "Forbidden"# highest previlage is given to admin only 
+        }), 403                 # or depends but usully admin 
+
+    return jsonify({
+        "message": "User Created Successfully"  # Status code 201 -> user CREATED   
+    }), 201
     
 
 if __name__ == "__main__": # start server -> run this only if app.py is executed
