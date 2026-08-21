@@ -1,0 +1,27 @@
+apiVersion: apps/v1       # Use deployment API from the apps group version 1
+kind: Deployment          # Create something that Manage Application pods
+
+metadata:
+  name: auth-api          # name 
+
+spec:                     # Deesired state - everyting in here will be achieved by k8s
+  replicas: 2             # Number of copies  -> atleast 2 pods must always exist
+
+  selector:
+    matchLabels:
+      app: auth-api        # manage all the pods with this label 
+    
+  template:                # Blueprint for creating pods
+    metadata:
+      labels:
+        app: auth-api      # every pod created will be attached to this pod label 
+
+    spec:                  # What goes inside pod
+      containers:
+        - name: auth-api
+          image: auth-api:latest      # image to scale
+          imagePullPolicy: Never      # DO NOT download image from the Docker hub
+
+          ports:
+            - containerPort: 5000     # Flask application runs on port 5000 inside the container
+    

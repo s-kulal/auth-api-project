@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service             # Create a Network Object
+
+metadata:
+  name: auth-api-service   # name -> should always be in lower case
+
+spec:
+  selector:
+    app: auth-api          # K8s sends traffic to the pods with this label
+
+  ports:
+    - port: 5000            # Service Port
+      targetPort: 5000     # Target Port
+
+  type: NodePort           # Expose application to the outside cluster
