@@ -1,0 +1,29 @@
+name: Flask CI
+
+on:
+    push:               # Trigger
+        branches:
+            - main
+
+jobs:
+    build:
+
+      runs-on: ubuntu-latest      # Runner -> Temporary Ubuntu VM
+
+      steps:
+        - name: Checout Repository
+          uses: actions/checkout@v4   # Download code to local pc
+
+        - name: Set up Python
+          uses: actions/setup-python@v5  # Install Python
+          with:
+            python-version: "3.12"          
+
+        - name: Install Dependencies
+          run: |
+            pip install -r requirements.txt     # Install Flask
+
+        - name: Verify Application      # Check syntax
+          run: |
+            python -m py_compile app.py
+      

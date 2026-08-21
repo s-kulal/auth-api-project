@@ -76,7 +76,7 @@ def profile():
         }), 401
 
     return jsonify({
-        "username": tokens[token]
+        "username": user["username"]
     }), 200
 
 
@@ -115,7 +115,8 @@ def create_user():
 
 # Launch FLASK
 if __name__ == "__main__": # start server -> run this only if app.py is executed
-    app.run(debug=True) # launch flask 
-
+    # app.run(debug=True) # launch flask 
+    app.run(host="0.0.0.0", debug=True)
+    # bcd 0.0.0.0 listens to all network interfaces
 
 
