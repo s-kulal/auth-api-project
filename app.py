@@ -1,6 +1,10 @@
 from flask import Flask, request, jsonify
+import jwt
+import datetime
 
 app = Flask(__name__) # create Flask application 
+
+SECRET_KEY = "CERN-secret-key"
 
 users = {               # fake database, it is just python dictionary 
     "admin": {
@@ -13,13 +17,42 @@ users = {               # fake database, it is just python dictionary
     }
 }
 
-tokens = {}
 
-@app.route("/")     # Home endpoint -> decorator
+# Authenticate user    ->    Function definition 
+
+def authenticate():
+    auth_header = request.headers.get("Authorization") # gets "Bearer admin-token"
+    
+    if not auth_header:
+        return None
+    
+    token = auth_header.replace("Bearer ", "") # replace "Bearer " with "" then 
+                                               # extract token  -> admin-token
+
+    try:
+        user = jwt.decode(
+            token,
+            SECRET_KEY,
+            algorithms=["HS256"]
+        )
+        return user
+    
+    except jwt.ExpiredSignatureError:
+        return None
+
+    except jwt.InvalidTokenError:
+        return None
+    
+
+    # return tokens.get(token)                                   
+    # bcs the endpoint needs {"username": "admin", "role":"admin"}
+
+ # Home endpoint -> decorator
+@app.route("/")    
 def home(): # this runs when someone reaches "/"
     return {
         "message":"Auth API Project"
-    } # client receives this message
+    }, 200 # client receives this message
 
 # Login endpoint
 
@@ -32,40 +65,31 @@ def login(): # login function
     username = data.get("username")
     password = data.get("password")
 
-    token = username + "-token"
+    # token = username + "-token"
 
     if username in users and users[username]["password"] == password: #authentication check
-        tokens[token] = {
-            "username": username,
-            "role": users[username]["role"]
-        }
-    
-        return jsonify({   # success response
-            "username": tokens[token]["username"],
-            "role": tokens[token]["role"]
+       
+        token = jwt.encode(
+            {
+                "username": username,
+                "role": users[username]["role"],
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+            },
+            SECRET_KEY,
+            algorithm="HS256"
+        )
+
+        return jsonify({   # success response    
+            "token": token
         }), 200
 
     return jsonify({
         "error": "Invalid Credentials"
     }), 401
 
-
-# Authenticate user    ->    Function definition 
-
-def authenticate():
-    auth_header = request.headers.get("Authorization") # gets "Bearer admin-token"
-    
-    if not auth_header:
-        return None
-    
-    token = auth_header.replace("Bearer ", "") # replace "Bearer " with "" then 
-                                               # extract token  -> admin-token
-    return tokens.get(token)                                   
-    # bcs the endpoint needs {"username": "admin", "role":"admin"}
-
 # Profile endpoint
 
-@app.route("/profile")
+@app.route("/profile", methods=["GET"])
 def profile():
 
     user = authenticate()
@@ -76,7 +100,8 @@ def profile():
         }), 401
 
     return jsonify({
-        "username": user["username"]
+        "username": user["username"],
+        "role": user["role"]
     }), 200
 
 
@@ -89,7 +114,7 @@ def create_user():
 
     if not user:         # Check token  -> from the authentication
         return jsonify({
-            "error": "Invalid Token"
+            "error": "Unauthorized"
         }), 401
 
     if user["role"] != "admin": # aunthenticating the role 
